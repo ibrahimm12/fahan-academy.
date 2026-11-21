@@ -4,12 +4,13 @@ A locally runnable learning-platform MVP with original English-language course c
 
 The study outline uses domain titles, weights, and context from a user-supplied July 2026 guide. Those facts have not been independently verified. Lessons and questions are original educational content, not copied sample questions. This is an independent study resource; it is not affiliated with or endorsed by a certification provider. Practice percentages are not official scaled scores or pass predictions.
 
+![Fahan Academy learning dashboard](docs/screenshots/dashboard-desktop.png)
+
 ## Run locally
 
 Requires Node.js 22.13+ (the built-in `node:sqlite` module is experimental in Node 22) and npm.
 
 ```powershell
-Set-Location 'M:\Amsterdam Job\Fahan-Academy'
 if (!(Test-Path .env)) { Copy-Item .env.example .env }
 # Generate a value with: node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
 # Put the generated value in SESSION_SECRET in .env.
