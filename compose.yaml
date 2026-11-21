@@ -1,0 +1,18 @@
+services:
+  fahan:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      APP_ORIGIN: http://localhost:3000
+      DATABASE_PATH: /app/data/fahan-academy.sqlite
+    volumes:
+      - fahan-data:/app/data
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+volumes:
+  fahan-data:

@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fahan-academy
+  labels:
+    app: fahan-academy
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: fahan-academy
+  template:
+    metadata:
+      labels:
+        app: fahan-academy
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: app
+          image: IMAGE_PLACEHOLDER
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "3000"
+            - name: APP_ORIGIN
+              value: https://REPLACE_WITH_HTTPS_HOST
+            - name: DATABASE_PATH
+              value: /app/data/fahan-academy.sqlite
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: fahan-secrets
+                  key: session-secret
+            - name: ADMIN_BOOTSTRAP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: fahan-secrets
+                  key: admin-bootstrap-key
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: ["ALL"]
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 8
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 192Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: fahan-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fahan-academy
+spec:
+  selector:
+    app: fahan-academy
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: fahan-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: fahan-secrets
+type: Opaque
+stringData:
+  session-secret: REPLACE_OUT_OF_BAND
+  admin-bootstrap-key: REPLACE_OUT_OF_BAND
